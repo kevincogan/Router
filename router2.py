@@ -1,5 +1,6 @@
 import pandas as pd
 import collections
+from tkinter import *
 
 class Router:
     def __init__(self, node, graph=None):
@@ -46,7 +47,7 @@ class Router:
 
 #####################################################################################################
 
-    def get_path(self, router_name):
+    def get_path(self, router_name, access=None):
         start = self.get_node(self.id)
         goal = self.get_node(router_name)
         #print(start.id, goal.id)
@@ -99,22 +100,26 @@ class Router:
         #print(unseenNodes.vert_dict["f"].adjacent)
 
         currentNode = goal
+        #print(currentNode.id)
         currentNode = currentNode.previous
         path.append(currentNode)
 
+
         while currentNode != start.id:
-            #=print(currentNode)
+            #print(currentNode)
+            #print(self.graph.vert_dict[currentNode].previous)
             currentNode = self.graph.vert_dict[currentNode].previous
+            #print("Entered path:",currentNode)
             path.append(currentNode)
-        #print(path)
 
-        # print("Start: " + start.id)
-        # print("End: " + goal.id)
-        # print("Path: " + "->".join(path[::-1]))
-        #print("Cost: " + str(self.graph.vert_dict[path[0]].distance))
-
-        hello = [start.id, goal.id, "->".join(path[::-1]), self.graph.vert_dict[path[0]].distance]
-        return hello
+        if access == 1:
+            hello = [start.id, goal.id, "->".join(path[::-1]), self.graph.vert_dict[path[0]].distance]
+            return hello
+        else:
+            print("Start: " + start.id)
+            print("End: " + goal.id)
+            print("Path: " + "->".join(path[::-1]))
+            print("Cost: " + str(self.graph.vert_dict[path[0]].distance))
 ##############################################################################################################
 
     def print_routing_table(self):
@@ -124,10 +129,12 @@ class Router:
         path_list = []
 
         router_destination = [i for i in self.graph.vert_dict if i != self.id]
+        #print(router_destination)
+        #print("-----------------------")
 
 
         for destination in router_destination:
-            items = self.get_path(destination)
+            items = self.get_path(destination, 1)
             from_list.append(items[0])
             to_list.append(items[1])
             path_list.append(items[2])
@@ -145,11 +152,32 @@ class Router:
 ##############################################################################################################
 
     def remove_router(self, router_name):
-        print(self.graph.vert_dict.pop(router_name))
-        print("---------------------------")
-        for i in self.graph.vert_dict["a"].adjacent:
-            if router_name == i.id:
-                self.graph.vert_dict["a"].adjacent.pop(i)
+        remove_list = []
+
+        self.graph.num_vertices = self.graph.num_vertices -1
+
+        for i in self.graph.vert_dict:
+            for j in self.graph.vert_dict[i].adjacent:
+                j.set_previous(None)
+                j.set_distance(9999999)
+                if j.id == router_name:
+                    remove_list.append(j)
+                # print(j.id, 1 ,j.previous)
+
+        for i in self.graph.vert_dict:
+            for k in remove_list:
+                if k in self.graph.vert_dict[i].adjacent:
+                    self.graph.vert_dict[i].adjacent.pop(k)
+                    #print(k.id, 1 ,k.previous)
+        self.graph.vert_dict.pop(router_name)
+
+        self.print_routing_table()
+
+
+
+
+    def router_two(self, remove_list=None):
+        print(remove_list)
 
 
 class Graph:
@@ -171,7 +199,7 @@ class Graph:
             self.add_router_node(goal)
 
         self.vert_dict[start].add_neighbor(self.vert_dict[goal], cost)
-        #self.vert_dict[goal].add_neighbor(self.vert_dict[start], cost) #Uncomment to make the links bidirectional.
+        self.vert_dict[goal].add_neighbor(self.vert_dict[start], cost) #Uncomment to make the links bidirectional.
 ################################################################################################
 
 
@@ -187,10 +215,17 @@ g.add_router("c", "f", 2)
 g.add_router("d", "e", 6)
 g.add_router("e", "f", 9)
 router = Router("a", g)
+router_two = Router("b", g)
 
 
-#router.get_path("e")
+#router.get_path("f")
 
-#router.print_routing_table()
-
+router.print_routing_table()
 router.remove_router("c")
+router.print_routing_table()
+
+router_two.remove_router("e")
+
+router_two.remove_router("f")
+
+#router.router_two()
