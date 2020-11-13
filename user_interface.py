@@ -25,7 +25,7 @@ class Router:
     def get_weight(self, connection):
         return self.connectioned_routers[connection]
 
-#####################################################################################################
+
     # sets the edge length.
     def set_edge_length(self, dist):
         self.edge_length = dist
@@ -34,10 +34,6 @@ class Router:
         return self.edge_length
 
 
-
-
-
-#####################################################################################################
     #Uses dijkstra's algorithm to find the shortest path from the start to the goal.
     def get_path(self, router_name, access=None):
         start = self.graph.router_dict[self.router_name] #Staring router.
